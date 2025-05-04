@@ -2,28 +2,44 @@ cmake_minimum_required(VERSION 3.14)
 project(lab07dz VERSION 1.0.0 LANGUAGES CXX)
 
 # 1. Установка политик CMake
-set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
-set(CMAKE_POLICY_DEFAULT_CMP0169 NEW)
+cmake_policy(SET CMP0135 NEW)
+cmake_policy(SET CMP0169 NEW)
 
-# 2. Загрузка Hunter через git clone (самый надежный способ)
+# 2. Загрузка Hunter через прямое клонирование
 find_package(Git REQUIRED)
-set(HUNTER_GIT_DIR "${CMAKE_BINARY_DIR}/hunter")
-set(HUNTER_GATE_FILE "${HUNTER_GIT_DIR}/cmake/HunterGate.cmake")
+
+# Устанавливаем путь к Hunter
+set(HUNTER_DIR "${CMAKE_BINARY_DIR}/_deps/hunter")
+set(HUNTER_GATE_FILE "${HUNTER_DIR}/cmake/HunterGate.cmake")
 
 if(NOT EXISTS "${HUNTER_GATE_FILE}")
-    message(STATUS "Cloning Hunter...")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch v0.24.8
-                https://github.com/cpp-pm/hunter.git "${HUNTER_GIT_DIR}"
-        RESULT_VARIABLE result
+    message(STATUS "Downloading Hunter...")
+    file(MAKE_DIRECTORY "${HUNTER_DIR}")
+    
+    # Скачиваем HunterGate.cmake напрямую
+    file(DOWNLOAD
+        "https://raw.githubusercontent.com/cpp-pm/hunter/v0.24.8/cmake/HunterGate.cmake"
+        "${HUNTER_GATE_FILE}"
+        SHOW_PROGRESS
+        TLS_VERIFY ON
     )
-    if(NOT result EQUAL 0)
-        message(FATAL_ERROR "Failed to clone Hunter repository")
-    endif()
+    
+    # Скачиваем модули Hunter
+    file(DOWNLOAD
+        "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
+        "${HUNTER_DIR}/hunter.tar.gz"
+        SHOW_PROGRESS
+        TLS_VERIFY ON
+    )
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf "${HUNTER_DIR}/hunter.tar.gz"
+        WORKING_DIRECTORY "${HUNTER_DIR}"
+    )
+    file(REMOVE "${HUNTER_DIR}/hunter.tar.gz")
 endif()
 
-# 3. Включение HunterGate
-list(APPEND CMAKE_MODULE_PATH "${HUNTER_GIT_DIR}/cmake/modules")
+# 3. Включаем HunterGate
+list(APPEND CMAKE_MODULE_PATH "${HUNTER_DIR}/hunter-0.24.8/cmake/modules")
 include("${HUNTER_GATE_FILE}")
 
 # 4. Инициализация Hunter
