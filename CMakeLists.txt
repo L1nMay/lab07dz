@@ -1,19 +1,23 @@
 cmake_minimum_required(VERSION 3.14)
 project(lab07dz VERSION 1.0.0 LANGUAGES CXX)
 
-# Современный способ подключения Hunter
+# Отключение предупреждения о временных метках
+cmake_policy(SET CMP0135 NEW)
+
+# Используем актуальные хеш-суммы
 include(FetchContent)
 FetchContent_Declare(
     hunter
     URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
-    URL_HASH SHA256=5e4c9408aad4c1c0e3a25fc2e5d3ca3881a6a6a3a7a2a2a2a2a2a2a2a2a2a2a
+    URL_HASH SHA256=d8e60ff290dd31553486fd339c5ec036d7ff29ea4eb85f2513ddcf31453f5434
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(hunter)
 
 include(hunter)
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
-    SHA1 "5e4c9408aad4c1c0e3a25fc2e5d3ca3881a6a6a3a7a2a2a2a2a2a2a2a2a2a2a"
+    SHA1 "d8e60ff290dd31553486fd339c5ec036d7ff29ea4eb85f2513ddcf31453f5434"
 )
 
 # Основная библиотека
