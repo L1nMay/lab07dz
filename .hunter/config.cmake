@@ -1,4 +1,3 @@
-# Конфигурация Hunter
 hunter_config(
     lab07dz
     VERSION ${HUNTER_lab07dz_VERSION}

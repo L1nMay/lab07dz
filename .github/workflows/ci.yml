@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Важно для Hunter
+        fetch-depth: 0  # Важно для работы Hunter
 
     - name: Install dependencies
       run: |
@@ -23,12 +23,16 @@ jobs:
           git \
           libssl-dev
 
+    - name: Clean previous builds
+      run: |
+        rm -rf ~/.hunter
+        rm -rf build
+
     - name: Configure CMake
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DHUNTER_ROOT="$HOME/.hunter" \
-          -DHUNTER_ENABLED=ON
+          -DHUNTER_ROOT="$HOME/.hunter"
 
     - name: Build
       run: cmake --build build --config Release --parallel 2
