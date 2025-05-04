@@ -1,20 +1,28 @@
 cmake_minimum_required(VERSION 3.14)
 project(lab07dz VERSION 1.0.0 LANGUAGES CXX)
 
-# Отключение предупреждения о временных метках
+# Настройка политики для корректной загрузки
 cmake_policy(SET CMP0135 NEW)
 
-# Используем актуальные хеш-суммы
+# Загрузка Hunter через FetchContent
 include(FetchContent)
 FetchContent_Declare(
     hunter
-    URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
-    URL_HASH SHA256=d8e60ff290dd31553486fd339c5ec036d7ff29ea4eb85f2513ddcf31453f5434
+    GIT_REPOSITORY "https://github.com/cpp-pm/hunter.git"
+    GIT_TAG v0.24.8
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/hunter-src"
+    BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/hunter-build"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
-FetchContent_MakeAvailable(hunter)
 
-include(hunter)
+# Явно включаем Hunter до использования
+FetchContent_GetProperties(hunter)
+if(NOT hunter_POPULATED)
+    FetchContent_Populate(hunter)
+    list(APPEND CMAKE_MODULE_PATH "${hunter_SOURCE_DIR}/cmake/modules")
+    include("${hunter_SOURCE_DIR}/cmake/HunterGate.cmake")
+endif()
+
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
     SHA1 "d8e60ff290dd31553486fd339c5ec036d7ff29ea4eb85f2513ddcf31453f5434"

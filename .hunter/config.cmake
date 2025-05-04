@@ -1,4 +1,4 @@
-cat << 'EOF' > .hunter/config.cmake
+# Конфигурация Hunter
 hunter_config(
     lab07dz
     VERSION ${HUNTER_lab07dz_VERSION}
@@ -6,4 +6,3 @@ hunter_config(
         BUILD_SHARED_LIBS=ON
         LAB07DZ_BUILD_TESTS=ON
 )
-EOF
