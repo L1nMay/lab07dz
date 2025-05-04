@@ -1,34 +1,38 @@
 cmake_minimum_required(VERSION 3.14)
 project(lab07dz VERSION 1.0.0 LANGUAGES CXX)
 
-# Установка политик CMake
-cmake_policy(SET CMP0135 NEW)
-cmake_policy(SET CMP0169 NEW)
+# 1. Установка политик CMake
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0169 NEW)
 
-# Способ 1: Использование Hunter через ExternalProject (надежнее)
-include(ExternalProject)
-ExternalProject_Add(
-    hunter_project
-    GIT_REPOSITORY "https://github.com/cpp-pm/hunter.git"
-    GIT_TAG v0.24.8
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-)
+# 2. Загрузка Hunter через git clone (самый надежный способ)
+find_package(Git REQUIRED)
+set(HUNTER_GIT_DIR "${CMAKE_BINARY_DIR}/hunter")
+set(HUNTER_GATE_FILE "${HUNTER_GIT_DIR}/cmake/HunterGate.cmake")
 
-# Получаем путь к исходникам Hunter
-ExternalProject_Get_Property(hunter_project SOURCE_DIR)
-set(HUNTER_SOURCE_DIR "${SOURCE_DIR}")
-list(APPEND CMAKE_MODULE_PATH "${HUNTER_SOURCE_DIR}/cmake/modules")
+if(NOT EXISTS "${HUNTER_GATE_FILE}")
+    message(STATUS "Cloning Hunter...")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch v0.24.8
+                https://github.com/cpp-pm/hunter.git "${HUNTER_GIT_DIR}"
+        RESULT_VARIABLE result
+    )
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "Failed to clone Hunter repository")
+    endif()
+endif()
 
-# Инициализация Hunter
-include("${HUNTER_SOURCE_DIR}/cmake/HunterGate.cmake")
+# 3. Включение HunterGate
+list(APPEND CMAKE_MODULE_PATH "${HUNTER_GIT_DIR}/cmake/modules")
+include("${HUNTER_GATE_FILE}")
+
+# 4. Инициализация Hunter
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
     SHA1 "d8e60ff290dd31553486fd339c5ec036d7ff29ea4eb85f2513ddcf31453f5434"
 )
 
-# Основная конфигурация проекта
+# 5. Основная конфигурация проекта
 add_library(lab07dz
     src/lab07dz.cpp
     include/lab07dz/lab07dz.hpp
@@ -39,7 +43,7 @@ target_include_directories(lab07dz PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-# ... остальная часть вашего CMakeLists.txt
+# ... (остальная часть вашего CMakeLists.txt)
 # 6. Установка
 install(TARGETS lab07dz EXPORT lab07dz-targets
     ARCHIVE DESTINATION lib
