@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.14)
-project(lab07dz VERSION 1.0.0 LANGUAGES CXX)
+project(lab07dz VERSION 1.0.0 LANGUAGES CXX)  # Версия берется отсюда
+
+# Генерация версии для релиза
+set(RELEASE_NAME "v${PROJECT_VERSION}")
+message(STATUS "Preparing release: ${RELEASE_NAME}")
 
 # Основная библиотека
 add_library(lab07dz
     src/lab07dz.cpp
     include/lab07dz/lab07dz.hpp
 )
+
+# ... (остальная часть CMakeLists остается без изменений)
 
 # Публичные include-директории
 target_include_directories(lab07dz PUBLIC
