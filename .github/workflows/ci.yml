@@ -1,13 +1,6 @@
-name: CMake Hunter Build
+name: CI Pipeline
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-env:
-  BUILD_TYPE: Release
+on: [push, pull_request]
 
 jobs:
   build:
@@ -15,41 +8,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Необходимо для корректной работы Hunter
+        fetch-depth: 0
 
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          cmake \
-          git \
-          libssl-dev
+        sudo apt-get install -y build-essential cmake git libssl-dev
 
-    - name: Clean previous builds
-      run: |
-        rm -rf ~/.hunter
-        rm -rf build
+    - name: Configure
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-    - name: Configure CMake
-      run: |
-        cmake -B build \
-          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-          -DHUNTER_ENABLED=ON
+    - name: Build
+      run: cmake --build build --config Release --parallel 2
 
-    - name: Build project
-      run: |
-        cmake --build build \
-          --config ${{ env.BUILD_TYPE }} \
-          --parallel 2
-
-    - name: Run tests
-      run: |
-        cd build
-        ctest --output-on-failure
-
-    - name: Verify installation
-      run: |
-        cd build
-        cmake --install . --prefix install
-        ls -R install
+    - name: Test
+      run: ctest --test-dir build --output-on-failure
