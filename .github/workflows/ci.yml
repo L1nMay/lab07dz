@@ -6,22 +6,42 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Важно для работы с тегами Hunter
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          git \
+          libssl-dev
 
     - name: Configure CMake
-      run: cmake -B build -DBUILD_TESTING=ON
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DBUILD_TESTING=ON
 
-    - name: Build
-      run: cmake --build build --config Release
+    - name: Build project
+      run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel 2
 
-    - name: Test
-      run: ctest --test-dir build --output-on-failure
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure
+
+    - name: Verify installation
+      run: |
+        cd build
+        cmake --install . --prefix install
+        ls -R install
